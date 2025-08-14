@@ -33,12 +33,12 @@
         </a>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
           <li>
-            <a class="dropdown-item d-flex align-items-center" href="#">
+            <a class="dropdown-item d-flex align-items-center" href="/menu/edit-profil">
               Edit Profile
             </a>
           </li>
           <li>
-            <a class="dropdown-item d-flex align-items-center text-danger" href="../pages/sign-in.html">
+            <a class="dropdown-item d-flex align-items-center text-danger" href="/">
               Logout
             </a>
           </li>
