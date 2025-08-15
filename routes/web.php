@@ -1,55 +1,45 @@
 <?php
 
+// routes/web.php
+
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\UserController;
 
-// auth
-Route::get('/', function () {
-    return view('auth.login');
-})->name('login');
+// Login & Register
+Route::get('/', fn() => view('auth.login'))->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.process');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
-Route::get('/register', function () {
-    return view('auth.register');
-});
-Route::get('/menu/edit-profil', function () {
-    return view('auth.edit-profil');
-});
+Route::get('/register', fn() => view('auth.register'))->name('register');
+Route::post('/register', [AuthController::class, 'register'])->name('register.process');
 
-// menu (hanya untuk yang sudah login)
+// Hanya untuk user login
 Route::middleware('auth')->group(function () {
 
-    // Dashboard (bisa diakses semua yang login)
-    Route::get('/menu/dashboard', function () {
-        return view('menu.dashboard');
-    })->middleware('permission:view items');
+    // Edit profil
+    Route::get('/menu/edit-profil', fn() => view('auth.edit-profil'))->name('profile.edit');
+    Route::post('/menu/edit-profil', [AuthController::class, 'updateProfile'])->name('profile.update');
 
-    // Data Barang (bisa diakses semua yang punya permission view items)
-    Route::get('/menu/data-barang', function () {
-        return view('menu.data-barang');
-    })->middleware('permission:view items');
+    // Menu utama
+    Route::prefix('menu')->group(function () {
 
-    // Tambah Barang (bisa diakses semua yang punya permission create items)
-    Route::get('/menu/tambah-barang', function () {
-        return view('menu.tambah-barang');
-    })->middleware('permission:create items');
+        // View items
+        Route::middleware('permission:view items')->group(function () {
+            Route::view('/dashboard', 'menu.dashboard')->name('dashboard');
+            Route::view('/data-barang', 'menu.data-barang')->name('data-barang');
+            Route::view('/preview-barang', 'menu.preview-barang')->name('preview-barang');
+        });
 
-    // Preview Barang (bisa diakses semua yang punya permission view items)
-    Route::get('/menu/preview-barang', function () {
-        return view('menu.preview-barang');
-    })->middleware('permission:view items');
+        // Create items
+        Route::get('/tambah-barang', fn() => view('menu.tambah-barang'))
+            ->middleware('permission:create items')->name('tambah-barang');
 
-    // Tambah Kategori (bisa diakses semua yang punya permission create categories)
-    Route::get('/menu/tambah-kategori', function () {
-        return view('menu.tambah-kategori');
-    })->middleware('permission:create categories');
+        Route::get('/tambah-kategori', fn() => view('menu.tambah-kategori'))
+            ->middleware('permission:create categories')->name('tambah-kategori');
 
-    // Data User (hanya admin yang punya permission manage users)
-    Route::get('/menu/data-user', function () {
-        return view('menu.data-user');
-    })->middleware('permission:manage users');
-
+        // Manage users
+        Route::middleware('permission:manage users')->group(function () {
+            Route::resource('data-user', UserController::class)->names('data-user');
+        });
+    });
 });
-
-
-

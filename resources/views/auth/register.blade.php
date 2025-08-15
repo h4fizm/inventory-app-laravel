@@ -36,25 +36,22 @@
                 </div>
               </div>
               <div class="card-body">
-                <form role="form" class="text-start">
+                <form role="form" class="text-start" method="POST" action="{{ route('register.process') }}">
+                  @csrf
                   <div class="input-group input-group-outline my-3">
-                    <label class="form-label">Username</label>
-                    <input type="text" class="form-control">
+                    <input type="text" name="name" placeholder="Username" value="{{ old('name') }}" class="form-control" required>
                   </div>
                   <div class="input-group input-group-outline my-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-control">
+                    <input type="email" name="email" placeholder="Email" value="{{ old('email') }}" class="form-control" required>
                   </div>
                   <div class="input-group input-group-outline mb-3">
-                    <label class="form-label">Password</label>
-                    <input type="password" class="form-control">
+                    <input type="password" name="password" placeholder="Password" class="form-control" required>
                   </div>
                   <div class="input-group input-group-outline mb-3">
-                    <label class="form-label">Retype Password</label>
-                    <input type="password" class="form-control">
+                    <input type="password" name="password_confirmation" placeholder="Retype Password" class="form-control" required>
                   </div>
                   <div class="text-center">
-                    <button type="button" class="btn bg-gradient-success w-100 my-4 mb-2">Register</button>
+                    <button type="submit" class="btn bg-gradient-success w-100 my-4 mb-2">Register</button>
                   </div>
                   <p class="mt-4 text-sm text-center">
                     Sudah punya akun ?
@@ -97,8 +94,33 @@
       Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
     }
   </script>
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
   <script src="{{ asset('dashboard/assets/js/material-dashboard.min.js?v=3.2.0') }}"></script>
-</body>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  @if($errors->any())
+  <script>
+      Swal.fire({
+          icon: 'error',
+          title: 'Registrasi Gagal',
+          html: '{!! implode("<br>", $errors->all()) !!}',
+          confirmButtonColor: '#d33',
+          confirmButtonText: 'Coba Lagi'
+      });
+  </script>
+  @endif
 
+  @if(session('success'))
+  <script>
+      Swal.fire({
+          icon: 'success',
+          title: 'Berhasil',
+          text: '{{ session('success') }}',
+          confirmButtonColor: '#3085d6',
+          confirmButtonText: 'OK'
+      }).then(() => {
+          window.location.href = "{{ route('login') }}";
+      });
+  </script>
+  @endif
+
+</body>
 </html>

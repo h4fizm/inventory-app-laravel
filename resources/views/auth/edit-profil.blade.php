@@ -15,18 +15,19 @@
     <div class="col-12">
         <div class="card p-3">
             <h5 class="mb-3">Informasi Profil</h5>
-            <form id="edit-profil-form" novalidate>
+            <form id="edit-profil-form" action="{{ route('profile.update') }}" method="POST" novalidate>
+                @csrf
                 <div class="row">
                     <div class="col-md-6 mb-3">
                         <div class="input-group input-group-outline my-3 is-filled">
-                            <label class="form-label">Nama Lengkap</label>
-                            <input type="text" class="form-control" id="edit_nama" name="nama" value="John Doe" required>
+                            <input type="text" placeholder="Nama" class="form-control" id="edit_nama" name="nama" 
+                                   value="{{ old('nama', Auth::user()->name) }}" required>
                         </div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <div class="input-group input-group-outline my-3 is-filled">
-                            <label class="form-label">Email</label>
-                            <input type="email" class="form-control" id="edit_email" name="email" value="john.doe@example.com" required>
+                            <input type="email" placeholder="Email" class="form-control" id="edit_email" name="email" 
+                                   value="{{ old('email', Auth::user()->email) }}" required>
                         </div>
                     </div>
                 </div>
@@ -58,57 +59,60 @@
 </div>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const form = document.getElementById('edit-profil-form');
-        const namaInput = document.getElementById('edit_nama');
-        const emailInput = document.getElementById('edit_email');
-        const passwordInput = document.getElementById('edit_password');
-        const retypePasswordInput = document.getElementById('edit_retype_password');
-        
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('edit-profil-form');
 
-            let hasError = false;
+    form.addEventListener('submit', function(e) {
+        e.preventDefault();
 
-            // Validasi field yang wajib diisi
-            if (namaInput.value.trim() === '' || emailInput.value.trim() === '') {
-                hasError = true;
-            }
+        let formData = new FormData(form);
 
-            // Validasi password jika diisi
-            if (passwordInput.value !== '' || retypePasswordInput.value !== '') {
-                if (passwordInput.value !== retypePasswordInput.value) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Gagal',
-                        text: 'Kata Sandi Baru dan Konfirmasi Kata Sandi tidak cocok!',
-                    });
-                    return;
-                }
-            }
-
-            if (hasError) {
+        // Validasi password match
+        if (formData.get('password') !== '' || formData.get('retype_password') !== '') {
+            if (formData.get('password') !== formData.get('retype_password')) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Gagal',
-                    text: 'Nama dan Email tidak boleh kosong!',
+                    text: 'Kata Sandi Baru dan Konfirmasi Kata Sandi tidak cocok!',
                 });
                 return;
             }
+        }
 
-            // Tampilkan notifikasi sukses jika semua validasi berhasil
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Berhasil',
+                    text: data.message,
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Gagal',
+                    text: data.message || 'Terjadi kesalahan',
+                });
+            }
+        })
+        .catch(() => {
             Swal.fire({
-                icon: 'success',
-                title: 'Berhasil',
-                text: 'Profil berhasil diperbarui!',
-                showConfirmButton: false,
-                timer: 1500
-            }).then(() => {
-                // Opsional: reset form setelah berhasil
-                // form.reset();
+                icon: 'error',
+                title: 'Gagal',
+                text: 'Terjadi kesalahan pada server',
             });
         });
     });
+});
 </script>
 
 @endsection

@@ -106,10 +106,23 @@
       Scrollbar.init(document.querySelector('#sidenav-scrollbar'), options);
     }
   </script>
-  <!-- Github buttons -->
-  <script async defer src="https://buttons.github.io/buttons.js"></script>
   <!-- Control Center for Material Dashboard: parallax effects, scripts for the example pages etc -->
   <script src="{{ asset('dashboard/assets/js/material-dashboard.min.js?v=3.2.0') }}"></script>
+  <!-- Tambahan: SweetAlert -->
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+  @if($errors->any())
+  <script>
+      Swal.fire({
+          icon: 'error',
+          title: 'Login Gagal',
+          text: '{{ $errors->first() }}',
+          confirmButtonColor: '#d33',
+          confirmButtonText: 'Coba Lagi'
+      });
+  </script>
+  @endif
+
 </body>
 
 </html>

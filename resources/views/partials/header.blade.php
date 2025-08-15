@@ -35,7 +35,7 @@
         </a>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
           <li>
-            <a class="dropdown-item d-flex align-items-center" href="/menu/edit-profil">
+            <a class="dropdown-item d-flex align-items-center" href="{{ route('profile.edit') }}">
               Edit Profile
             </a>
           </li>
