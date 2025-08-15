@@ -28,8 +28,10 @@
 
       <!-- Profile dropdown -->
       <div class="dropdown">
-        <a class="nav-link text-body font-weight-bold px-0" href="#" role="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-          <i class="material-symbols-rounded">account_circle</i>
+        <a class="nav-link text-body font-weight-bold px-0 d-flex align-items-center" 
+           href="#" role="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+          <i class="material-symbols-rounded me-1">account_circle</i>
+          <span>{{ Auth::user()->name ?? 'Guest' }}</span>
         </a>
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
           <li>
@@ -38,9 +40,13 @@
             </a>
           </li>
           <li>
-            <a class="dropdown-item d-flex align-items-center text-danger" href="/">
-              Logout
-            </a>
+            <!-- Logout form -->
+            <form action="{{ route('logout') }}" method="POST" class="w-100">
+              @csrf
+              <button type="submit" class="dropdown-item d-flex align-items-center text-danger">
+                Logout
+              </button>
+            </form>
           </li>
         </ul>
       </div>
