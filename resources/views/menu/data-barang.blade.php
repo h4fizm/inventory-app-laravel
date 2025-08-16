@@ -31,6 +31,12 @@
         z-index: 1;
         border-radius: 0.5rem;
     }
+    .pagination .page-item .page-link span {
+        color: #fff; /* Memastikan ikon panah berwarna putih */
+    }
+    .pagination .page-item.disabled .page-link span {
+        color: #6c757d; /* Memastikan ikon panah berwarna abu-abu saat disabled */
+    }
 </style>
 
 <div class="row">
@@ -42,6 +48,27 @@
 
 <div class="row mt-4">
     <div class="col-12">
+        {{-- Alert Notifikasi Sukses --}}
+        @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            {{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
+
+        {{-- Alert Notifikasi Error (misal: validasi gagal) --}}
+        @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <strong>Gagal memperbarui data!</strong>
+            <ul>
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        @endif
+
         <div class="card p-3">
             {{-- Bagian filter dan search --}}
             <div class="d-flex justify-content-between align-items-center mb-3">
@@ -69,74 +96,55 @@
                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No</th>
                             <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nama Barang</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Kode Barang</th>
-                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Jumlah Barang</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nama Kategori</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Jumlah Barang</th>
+                            <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Lokasi Barang</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tgl Terakhir Update</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @php
-                        $data_barang = [
-                            ['nama_barang' => 'Keyboard Mekanik RGB', 'kode_barang' => 'KB-001', 'jumlah_barang' => 12, 'nama_kategori' => 'Aksesoris PC', 'tanggal_update' => '2025-08-10', 'latitude' => -7.2608, 'longitude' => 112.7482],
-                            ['nama_barang' => 'Mouse Gaming Wireless', 'kode_barang' => 'MS-005', 'jumlah_barang' => 8, 'nama_kategori' => 'Aksesoris PC', 'tanggal_update' => '2025-08-11', 'latitude' => -7.2533, 'longitude' => 112.7567],
-                            ['nama_barang' => 'SSD M.2 512GB', 'kode_barang' => 'SS-010', 'jumlah_barang' => 15, 'nama_kategori' => 'Komponen PC', 'tanggal_update' => '2025-08-12', 'latitude' => -7.2450, 'longitude' => 112.7401],
-                            ['nama_barang' => 'Monitor 24 Inch 144Hz', 'kode_barang' => 'MN-007', 'jumlah_barang' => 6, 'nama_kategori' => 'Hardware', 'tanggal_update' => '2025-08-13', 'latitude' => -7.2588, 'longitude' => 112.7605],
-                            ['nama_barang' => 'Headset Gaming', 'kode_barang' => 'HS-003', 'jumlah_barang' => 20, 'nama_kategori' => 'Aksesoris PC', 'tanggal_update' => '2025-08-10', 'latitude' => -7.2655, 'longitude' => 112.7533],
-                            ['nama_barang' => 'Webcam HD 1080p', 'kode_barang' => 'WC-001', 'jumlah_barang' => 11, 'nama_kategori' => 'Periferal', 'tanggal_update' => '2025-08-11', 'latitude' => -7.2512, 'longitude' => 112.7420],
-                            ['nama_barang' => 'Speaker Bluetooth', 'kode_barang' => 'SP-002', 'jumlah_barang' => 18, 'nama_kategori' => 'Audio', 'tanggal_update' => '2025-08-12', 'latitude' => -7.2489, 'longitude' => 112.7651],
-                            ['nama_barang' => 'CPU Intel i9-12900K', 'kode_barang' => 'CPU-020', 'jumlah_barang' => 7, 'nama_kategori' => 'Komponen PC', 'tanggal_update' => '2025-08-13', 'latitude' => -7.2615, 'longitude' => 112.7490],
-                            ['nama_barang' => 'VGA NVIDIA RTX 3080', 'kode_barang' => 'VGA-015', 'jumlah_barang' => 4, 'nama_kategori' => 'Komponen PC', 'tanggal_update' => '2025-08-10', 'latitude' => -7.2503, 'longitude' => 112.7548],
-                            ['nama_barang' => 'RAM Corsair Vengeance', 'kode_barang' => 'RAM-008', 'jumlah_barang' => 9, 'nama_kategori' => 'Komponen PC', 'tanggal_update' => '2025-08-11', 'latitude' => -7.2631, 'longitude' => 112.7410],
-                            ['nama_barang' => 'Motherboard ASUS ROG', 'kode_barang' => 'MB-012', 'jumlah_barang' => 13, 'nama_kategori' => 'Komponen PC', 'tanggal_update' => '2025-08-12', 'latitude' => -7.2555, 'longitude' => 112.7588],
-                            ['nama_barang' => 'Power Supply 750W', 'kode_barang' => 'PS-004', 'jumlah_barang' => 17, 'nama_kategori' => 'Komponen PC', 'tanggal_update' => '2025-08-13', 'latitude' => -7.2499, 'longitude' => 112.7511],
-                            ['nama_barang' => 'Casing PC Corsair', 'kode_barang' => 'CS-009', 'jumlah_barang' => 14, 'nama_kategori' => 'Hardware', 'tanggal_update' => '2025-08-10', 'latitude' => -7.2622, 'longitude' => 112.7634],
-                            ['nama_barang' => 'Printer Epson L3110', 'kode_barang' => 'PR-006', 'jumlah_barang' => 16, 'nama_kategori' => 'Periferal', 'tanggal_update' => '2025-08-11', 'latitude' => -7.2580, 'longitude' => 112.7570],
-                            ['nama_barang' => 'Harddisk Eksternal 1TB', 'kode_barang' => 'HD-003', 'jumlah_barang' => 19, 'nama_kategori' => 'Penyimpanan', 'tanggal_update' => '2025-08-12', 'latitude' => -7.2530, 'longitude' => 112.7455],
-                            ['nama_barang' => 'Webcam 4K', 'kode_barang' => 'WC-002', 'jumlah_barang' => 10, 'nama_kategori' => 'Periferal', 'tanggal_update' => '2025-08-13', 'latitude' => -7.2644, 'longitude' => 112.7505],
-                            ['nama_barang' => 'Mousepad Gaming XL', 'kode_barang' => 'MP-001', 'jumlah_barang' => 22, 'nama_kategori' => 'Aksesoris PC', 'tanggal_update' => '2025-08-10', 'latitude' => -7.2471, 'longitude' => 112.7618],
-                            ['nama_barang' => 'Kabel HDMI 2 Meter', 'kode_barang' => 'CB-004', 'jumlah_barang' => 25, 'nama_kategori' => 'Kabel & Adaptor', 'tanggal_update' => '2025-08-11', 'latitude' => -7.2598, 'longitude' => 112.7432],
-                            ['nama_barang' => 'Webcam 1080p', 'kode_barang' => 'WC-001', 'jumlah_barang' => 12, 'nama_kategori' => 'Periferal', 'tanggal_update' => '2025-08-12', 'latitude' => -7.2562, 'longitude' => 112.7523],
-                            ['nama_barang' => 'Harddisk Eksternal 2TB', 'kode_barang' => 'HD-004', 'jumlah_barang' => 15, 'nama_kategori' => 'Penyimpanan', 'tanggal_update' => '2025-08-13', 'latitude' => -7.2440, 'longitude' => 112.7599],
-                        ];
-                        $rowsPerPage = 10;
-                        
-                        $hari_indonesia = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
-                        $bulan_indonesia = ['January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret', 'April' => 'April', 'May' => 'Mei', 'June' => 'Juni', 'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September', 'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'];
-                        
-                        // Ambil daftar kategori unik dari data_barang untuk dropdown
-                        $unique_categories = array_unique(array_column($data_barang, 'nama_kategori'));
-                        @endphp
-                        @foreach($data_barang as $index => $item)
-                        @php
-                            $tanggal_obj = date_create($item['tanggal_update']);
-                            $tanggal_terformat = str_replace(array_keys($hari_indonesia), array_values($hari_indonesia), $tanggal_obj->format('l'));
-                            $tanggal_terformat .= ', ' . $tanggal_obj->format('d');
-                            $tanggal_terformat .= ' ' . str_replace(array_keys($bulan_indonesia), array_values($bulan_indonesia), $tanggal_obj->format('F'));
-                            $tanggal_terformat .= ' ' . $tanggal_obj->format('Y');
-                        @endphp
-                        <tr class="data-row" data-page="{{ floor($index / $rowsPerPage) + 1 }}" data-row-id="{{ $index }}" style="display: {{ (floor($index / $rowsPerPage) + 1) == 1 ? '' : 'none' }}">
-                            <td><p class="text-xs font-weight-bold mb-0">{{ $index + 1 }}</p></td>
-                            <td class="nama_barang_td"><p class="text-xs font-weight-bold mb-0">{{ $item['nama_barang'] }}</p></td>
-                            <td class="text-center kode_barang_td"><p class="text-xs font-weight-bold mb-0">{{ $item['kode_barang'] }}</p></td>
-                            <td class="text-center jumlah_barang_td"><p class="text-xs font-weight-bold mb-0">{{ $item['jumlah_barang'] }}</p></td>
-                            <td class="text-center nama_kategori_td"><p class="text-xs font-weight-bold mb-0">{{ $item['nama_kategori'] }}</p></td>
-                            <td class="text-center tanggal-update" data-original-date="{{ $item['tanggal_update'] }}">
-                                <p class="text-xs font-weight-bold mb-0">{{ $tanggal_terformat }}</p>
-                            </td>
-                            <td class="text-center">
-                                <a href="#" class="btn btn-sm btn-dark mb-0 lokasi-btn" data-bs-toggle="modal" data-bs-target="#lokasiModal" data-row-id="{{ $index }}" data-latitude="{{ $item['latitude'] }}" data-longitude="{{ $item['longitude'] }}">Lokasi</a>
-                                <a href="#" class="btn btn-sm btn-warning mb-0 edit-btn" data-bs-toggle="modal" data-bs-target="#editBarangModal">Edit</a>
-                                <a href="#" class="btn btn-sm btn-danger mb-0 delete-btn">Delete</a>
-                            </td>
-                        </tr>
-                        @endforeach
-                        <tr id="no-data-row" style="display: none;">
-                            <td colspan="7" class="text-center text-secondary">Barang tidak ditemukan.</td>
+                        @if($data_barang->isEmpty())
+                            <tr id="no-data-row">
+                                <td colspan="8" class="text-center text-secondary">Data barang tidak ditemukan.</td>
+                            </tr>
+                        @else
+                            @foreach($data_barang as $index => $item)
+                                <tr class="data-row" data-id="{{ $item->id }}" data-updated-at="{{ $item->updated_at }}">
+                                    <td><p class="text-xs font-weight-bold mb-0">{{ $index + 1 }}</p></td>
+                                    <td class="nama-barang-cell"><p class="text-xs font-weight-bold mb-0">{{ $item->nama_barang }}</p></td>
+                                    <td class="text-center"><p class="text-xs font-weight-bold mb-0">{{ $item->kode_barang }}</p></td>
+                                    <td class="text-center"><p class="text-xs font-weight-bold mb-0">{{ $item->kategori->nama_kategori ?? 'N/A' }}</p></td>
+                                    <td class="text-center"><p class="text-xs font-weight-bold mb-0">{{ $item->jumlah_barang }}</p></td>
+                                    <td class="text-center"><p class="text-xs font-weight-bold mb-0">{{ $item->lokasi_barang }}</p></td>
+                                    <td class="text-center">
+                                         <p class="text-xs font-weight-bold mb-0">{{ \Carbon\Carbon::parse($item->updated_at)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</p>
+                                    </td>
+                                    <td class="text-center">
+                                        <a href="#" class="btn btn-sm btn-dark mb-0 lokasi-btn" data-bs-toggle="modal" data-bs-target="#lokasiModal" data-latitude="{{ $item->latitude }}" data-longitude="{{ $item->longitude }}">Lokasi</a>
+                                        <a href="#" class="btn btn-sm btn-warning mb-0 edit-btn"
+                                            data-bs-toggle="modal"
+                                            data-bs-target="#editBarangModal"
+                                            data-id="{{ $item->id }}"
+                                            data-nama="{{ $item->nama_barang }}"
+                                            data-kode="{{ $item->kode_barang }}"
+                                            data-jumlah="{{ $item->jumlah_barang }}"
+                                            data-kategori-id="{{ $item->category_id }}">
+                                            Edit
+                                        </a>
+                                        <a href="#" class="btn btn-sm btn-danger mb-0 delete-btn" data-id="{{ $item->id }}">Delete</a>
+                                    </td>
+                                </tr>
+                            @endforeach
+                        @endif
+                        <tr id="no-data-row-js" style="display: none;">
+                            <td colspan="8" class="text-center text-secondary">Data Tidak Ditemukan.</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+            
+            {{-- Pagination --}}
             <div class="d-flex justify-content-end mt-3">
                 <nav aria-label="Page navigation example">
                     <ul class="pagination">
@@ -144,7 +152,7 @@
                             <a class="page-link" href="#">&laquo;</a>
                         </li>
                         <li class="page-item" id="prev-page">
-                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&lt;</a>
+                            <a class="page-link" href="#">&lt;</a>
                         </li>
                         <div id="page-numbers" class="d-flex"></div>
                         <li class="page-item" id="next-page">
@@ -169,26 +177,27 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="editBarangForm">
-                    <input type="hidden" id="edit_row_id">
+                <form id="editBarangForm" method="POST">
+                    @csrf
+                    @method('PUT')
+                    {{-- Perbaikan: Hapus 'name="id"' untuk menghindari konflik dengan Route Model Binding --}}
+                    <input type="hidden" id="edit_item_id"> 
                     <div class="input-group input-group-outline mb-3">
                         <label for="edit_nama_barang" class="form-label">Nama Barang</label>
-                        <input type="text" class="form-control" id="edit_nama_barang">
+                        <input type="text" class="form-control" id="edit_nama_barang" name="nama_barang">
                     </div>
                     <div class="input-group input-group-outline mb-3">
                         <label for="edit_kode_barang" class="form-label">Kode Barang</label>
-                        <input type="text" class="form-control" id="edit_kode_barang">
+                        <input type="text" class="form-control" id="edit_kode_barang" name="kode_barang">
                     </div>
                     <div class="input-group input-group-outline mb-3">
                         <label for="edit_jumlah_barang" class="form-label">Jumlah Barang</label>
-                        <input type="number" class="form-control" id="edit_jumlah_barang">
+                        <input type="number" class="form-control" id="edit_jumlah_barang" name="jumlah_barang">
                     </div>
                     <div class="input-group input-group-outline mb-3">
                         <label for="edit_nama_kategori" class="form-label">Nama Kategori</label>
-                        <select class="form-select" id="edit_nama_kategori">
-                            @foreach($unique_categories as $category)
-                                <option value="{{ $category }}">{{ $category }}</option>
-                            @endforeach
+                        <select class="form-select" id="edit_nama_kategori" name="category_id">
+                            {{-- Dropdown kategori diisi oleh JavaScript --}}
                         </select>
                     </div>
                 </form>
@@ -242,14 +251,16 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const tableBody = document.querySelector('.table tbody');
-        const paginationList = document.querySelector('.pagination');
+        const paginationContainer = document.querySelector('nav[aria-label="Page navigation example"]');
         const pageNumbersContainer = document.getElementById('page-numbers');
         const searchInput = document.getElementById('search-input');
         const tanggalMulaiInput = document.getElementById('tanggal_mulai');
         const tanggalAkhirInput = document.getElementById('tanggal_akhir');
         
-        const allRows = Array.from(tableBody.querySelectorAll('tr.data-row'));
+        // Mengambil semua baris dari tabel
+        const allRows = Array.from(document.querySelectorAll('.table tbody tr.data-row'));
         const noDataRow = document.getElementById('no-data-row');
+        const noDataRowJS = document.getElementById('no-data-row-js');
         const rowsPerPage = 10;
         let currentPage = 1;
         let visibleRows = [];
@@ -258,7 +269,23 @@
         const lokasiModalElement = document.getElementById('lokasiModal');
         const editBarangModalElement = document.getElementById('editBarangModal');
 
-        // Fungsi untuk membersihkan backdrop modal
+        // Tampilkan notifikasi sukses dan error jika ada
+        const successAlert = document.querySelector('.alert.alert-success');
+        if (successAlert) {
+            setTimeout(() => {
+                const bootstrapAlert = bootstrap.Alert.getOrCreateInstance(successAlert);
+                bootstrapAlert.close();
+            }, 5000);
+        }
+
+        const errorAlert = document.querySelector('.alert.alert-danger');
+        if (errorAlert) {
+            setTimeout(() => {
+                const bootstrapAlert = bootstrap.Alert.getOrCreateInstance(errorAlert);
+                bootstrapAlert.close();
+            }, 8000);
+        }
+
         function cleanupModalBackdrops() {
             const backdrops = document.querySelectorAll('.modal-backdrop');
             backdrops.forEach(backdrop => backdrop.remove());
@@ -267,18 +294,16 @@
             document.body.style.paddingRight = '';
         }
 
-        // Fungsi untuk menutup modal dan membersihkan backdrop
         function closeModalWithCleanup(modalElement) {
             const modal = bootstrap.Modal.getInstance(modalElement);
             modal.hide();
-            
-            // Cleanup setelah modal benar-benar tertutup
             modalElement.addEventListener('hidden.bs.modal', function handler() {
                 cleanupModalBackdrops();
                 modalElement.removeEventListener('hidden.bs.modal', handler);
             }, { once: true });
         }
-
+        
+        // Fungsi untuk memperbarui daftar baris yang terlihat
         function updateVisibleRows() {
             const searchQuery = searchInput.value.toLowerCase();
             const startDate = tanggalMulaiInput.value;
@@ -286,23 +311,28 @@
 
             visibleRows = allRows.filter(row => {
                 const rowText = row.textContent.toLowerCase();
-                const rowDate = row.querySelector('.tanggal-update').getAttribute('data-original-date');
+                const rowDate = row.getAttribute('data-updated-at');
                 const searchMatch = rowText.includes(searchQuery);
                 let dateMatch = (!startDate || rowDate >= startDate) && (!endDate || rowDate <= endDate);
                 return searchMatch && dateMatch;
             });
         }
         
+        // Fungsi untuk menampilkan halaman tertentu
         function showPage(page) {
             const start = (page - 1) * rowsPerPage;
             const end = start + rowsPerPage;
+            let currentNumber = start + 1;
 
             allRows.forEach(row => row.style.display = 'none');
             for (let i = start; i < end && i < visibleRows.length; i++) {
-                visibleRows[i].style.display = '';
+                const row = visibleRows[i];
+                row.querySelector('td:first-child p').textContent = currentNumber++;
+                row.style.display = '';
             }
         }
         
+        // Fungsi untuk merender pagination
         function renderPagination() {
             const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
             pageNumbersContainer.innerHTML = '';
@@ -323,9 +353,16 @@
             prevPageBtn.classList.toggle('disabled', currentPage === 1 || totalPages === 0);
             nextPageBtn.classList.toggle('disabled', currentPage === totalPages || totalPages === 0);
             lastPageBtn.classList.toggle('disabled', currentPage === totalPages || totalPages === 0);
+            
+            // Logika menampilkan atau menyembunyikan pesan "Data Tidak Ditemukan"
+            if (noDataRow) {
+                noDataRow.style.display = 'none'; // Selalu sembunyikan yang dari PHP
+            }
+            if (noDataRowJS) {
+                noDataRowJS.style.display = visibleRows.length === 0 ? '' : 'none';
+            }
 
-            noDataRow.style.display = visibleRows.length === 0 ? '' : 'none';
-            paginationList.style.display = visibleRows.length === 0 ? 'none' : 'flex';
+            paginationContainer.style.display = visibleRows.length > rowsPerPage || visibleRows.length === 0 ? 'block' : 'none';
         }
 
         function filterAndRender() {
@@ -335,7 +372,7 @@
             renderPagination();
         }
 
-        paginationList.addEventListener('click', function(e) {
+        paginationContainer.addEventListener('click', function(e) {
             e.preventDefault();
             const clickedItem = e.target.closest('.page-item');
             if (!clickedItem || clickedItem.classList.contains('disabled') || clickedItem.classList.contains('active')) return;
@@ -362,26 +399,39 @@
             if (!btn) return;
             
             const row = e.target.closest('tr');
-            const rowId = row.getAttribute('data-row-id');
+            const itemId = row.getAttribute('data-id');
 
             if (btn.classList.contains('edit-btn')) {
-                const namaBarang = row.querySelector('.nama_barang_td p').textContent;
-                const kodeBarang = row.querySelector('.kode_barang_td p').textContent;
-                const jumlahBarang = row.querySelector('.jumlah_barang_td p').textContent;
-                const namaKategori = row.querySelector('.nama_kategori_td p').textContent;
-                
-                document.getElementById('edit_row_id').value = rowId;
+                e.preventDefault();
+                const namaBarang = btn.getAttribute('data-nama');
+                const kodeBarang = btn.getAttribute('data-kode');
+                const jumlahBarang = btn.getAttribute('data-jumlah');
+                const kategoriId = btn.getAttribute('data-kategori-id');
+
+                document.getElementById('edit_item_id').value = itemId;
                 document.getElementById('edit_nama_barang').value = namaBarang;
                 document.getElementById('edit_kode_barang').value = kodeBarang;
                 document.getElementById('edit_jumlah_barang').value = jumlahBarang;
-                document.getElementById('edit_nama_kategori').value = namaKategori;
 
-                document.querySelectorAll('#editBarangForm .form-control, #editBarangForm .form-select').forEach(el => {
+                document.getElementById('editBarangModal').querySelectorAll('.form-control').forEach(el => {
                     el.parentElement.classList.add('is-filled');
                 });
 
-                const editBarangModal = new bootstrap.Modal(editBarangModalElement);
-                editBarangModal.show();
+                const kategoriSelect = document.getElementById('edit_nama_kategori');
+                kategoriSelect.innerHTML = ''; 
+                
+                const uniqueCategories = @json($unique_categories);
+                
+                uniqueCategories.forEach(kategori => {
+                    const option = document.createElement('option');
+                    option.value = kategori.id;
+                    option.textContent = kategori.nama_kategori;
+                    if (kategori.id == kategoriId) {
+                        option.selected = true;
+                    }
+                    kategoriSelect.appendChild(option);
+                });
+                kategoriSelect.parentElement.classList.add('is-filled');
             }
 
             if (btn.classList.contains('delete-btn')) {
@@ -397,30 +447,29 @@
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        row.remove();
-                        const indexToRemove = allRows.findIndex(r => r === row);
-                        if (indexToRemove > -1) {
-                            allRows.splice(indexToRemove, 1);
-                        }
-                        filterAndRender();
-                        Swal.fire(
-                            'Dihapus!',
-                            'Data berhasil dihapus.',
-                            'success'
-                        );
+                        const form = document.createElement('form');
+                        form.method = 'POST';
+                        form.action = `{{ route('data-barang.destroy', ['barang' => 'TEMP_ID']) }}`.replace('TEMP_ID', itemId);
+                        form.style.display = 'none';
+                        form.innerHTML = `
+                            @csrf
+                            @method('DELETE')
+                        `;
+                        document.body.appendChild(form);
+                        form.submit();
                     }
                 });
             }
 
             if (btn.classList.contains('lokasi-btn')) {
-                const namaBarang = row.querySelector('.nama_barang_td p').textContent;
+                const namaBarang = row.querySelector('.nama-barang-cell').textContent;
                 const latitude = parseFloat(btn.getAttribute('data-latitude'));
                 const longitude = parseFloat(btn.getAttribute('data-longitude'));
                 
                 document.getElementById('lokasi-nama-barang').textContent = namaBarang;
                 document.getElementById('lokasi_latitude').value = latitude.toFixed(6);
                 document.getElementById('lokasi_longitude').value = longitude.toFixed(6);
-                document.getElementById('lokasi_row_id').value = rowId;
+                document.getElementById('lokasi_row_id').value = itemId;
 
                 document.querySelectorAll('#lokasiForm .form-control').forEach(el => {
                     el.parentElement.classList.add('is-filled');
@@ -432,67 +481,16 @@
         });
 
         document.getElementById('saveChangesBtn').addEventListener('click', function() {
-            const rowId = document.getElementById('edit_row_id').value;
-            const namaBarangBaru = document.getElementById('edit_nama_barang').value;
-            const kodeBarangBaru = document.getElementById('edit_kode_barang').value;
-            const jumlahBarangBaru = document.getElementById('edit_jumlah_barang').value;
-            const namaKategoriBaru = document.getElementById('edit_nama_kategori').value;
-
-            if (namaBarangBaru.trim() === '' || kodeBarangBaru.trim() === '' || jumlahBarangBaru.trim() === '') {
-                Swal.fire({ icon: 'error', title: 'Gagal', text: 'Semua kolom wajib diisi!' });
-                return;
-            }
-
-            const rowToUpdate = document.querySelector(`tr[data-row-id="${rowId}"]`);
-            if (rowToUpdate) {
-                rowToUpdate.querySelector('.nama_barang_td p').textContent = namaBarangBaru;
-                rowToUpdate.querySelector('.kode_barang_td p').textContent = kodeBarangBaru;
-                rowToUpdate.querySelector('.jumlah_barang_td p').textContent = jumlahBarangBaru;
-                rowToUpdate.querySelector('.nama_kategori_td p').textContent = namaKategoriBaru;
-            }
-            
-            closeModalWithCleanup(editBarangModalElement);
-            
-            setTimeout(() => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: 'Data barang berhasil diperbarui!',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            }, 100);
-        });
-
-        document.getElementById('saveLokasiBtn').addEventListener('click', function() {
-            const rowId = document.getElementById('lokasi_row_id').value;
-            const newLatitude = document.getElementById('lokasi_latitude').value;
-            const newLongitude = document.getElementById('lokasi_longitude').value;
-            
-            const rowToUpdate = document.querySelector(`tr[data-row-id="${rowId}"]`);
-            if (rowToUpdate) {
-                const lokasiBtn = rowToUpdate.querySelector('.lokasi-btn');
-                lokasiBtn.setAttribute('data-latitude', newLatitude);
-                lokasiBtn.setAttribute('data-longitude', newLongitude);
-            }
-            
-            closeModalWithCleanup(lokasiModalElement);
-            
-            setTimeout(() => {
-                Swal.fire({
-                    icon: 'success',
-                    title: 'Berhasil',
-                    text: 'Lokasi barang berhasil diperbarui!',
-                    showConfirmButton: false,
-                    timer: 1500
-                });
-            }, 100);
+            const form = document.getElementById('editBarangForm');
+            const itemId = document.getElementById('edit_item_id').value;
+            form.action = `{{ route('data-barang.update', ['barang' => 'TEMP_ID']) }}`.replace('TEMP_ID', itemId);
+            form.submit();
         });
 
         lokasiModalElement.addEventListener('shown.bs.modal', () => {
-            const rowId = document.getElementById('lokasi_row_id').value;
-            const row = document.querySelector(`tr[data-row-id="${rowId}"]`);
-            const namaBarang = row.querySelector('.nama_barang_td p').textContent;
+            const itemId = document.getElementById('lokasi_row_id').value;
+            const row = document.querySelector(`tr[data-id="${itemId}"]`);
+            const namaBarang = row.querySelector('.nama-barang-cell').textContent;
             const latitude = parseFloat(row.querySelector('.lokasi-btn').getAttribute('data-latitude'));
             const longitude = parseFloat(row.querySelector('.lokasi-btn').getAttribute('data-longitude'));
             
@@ -529,7 +527,6 @@
             }, 300);
         });
 
-        // Setup cleanup untuk semua modal
         document.querySelectorAll('.modal').forEach(modal => {
             modal.addEventListener('hidden.bs.modal', function() {
                 cleanupModalBackdrops();

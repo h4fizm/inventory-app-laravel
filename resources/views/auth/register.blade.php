@@ -55,7 +55,7 @@
                   </div>
                   <p class="mt-4 text-sm text-center">
                     Sudah punya akun ?
-                    <a href="/" class="text-primary text-gradient font-weight-bold">Login Disini</a>
+                    <a href="/auth/login" class="text-primary text-gradient font-weight-bold">Login Disini</a>
                   </p>
                 </form>
               </div>

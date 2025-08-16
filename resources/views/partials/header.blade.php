@@ -2,7 +2,6 @@
      id="navbarBlur" data-scroll="true">
   <div class="container-fluid py-1 px-3 d-flex justify-content-between align-items-center">
 
-    <!-- Breadcrumb -->
     <nav aria-label="breadcrumb">
       <ol class="breadcrumb bg-transparent mb-0 pb-0 pt-1 px-0 me-sm-6 me-5">
         <li class="breadcrumb-item text-sm">
@@ -14,10 +13,8 @@
       </ol>
     </nav>
 
-    <!-- Right side: Burger button & Profile dropdown -->
     <div class="d-flex align-items-center">
 
-      <!-- Burger button (mobile) -->
       <a href="javascript:;" class="nav-link text-body p-0 d-xl-none pe-3" id="iconNavbarSidenav">
         <div class="sidenav-toggler-inner">
           <i class="sidenav-toggler-line"></i>
@@ -26,7 +23,6 @@
         </div>
       </a>
 
-      <!-- Profile dropdown -->
       <div class="dropdown">
         <a class="nav-link text-body font-weight-bold px-0 d-flex align-items-center" 
            href="#" role="button" id="profileDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -36,14 +32,15 @@
         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="profileDropdown">
           <li>
             <a class="dropdown-item d-flex align-items-center" href="{{ route('profile.edit') }}">
+              <i class="material-symbols-rounded me-1 text-dark opacity-5">edit</i>
               Edit Profile
             </a>
           </li>
           <li>
-            <!-- Logout form -->
             <form action="{{ route('logout') }}" method="POST" class="w-100">
               @csrf
               <button type="submit" class="dropdown-item d-flex align-items-center text-danger">
+                <i class="material-symbols-rounded me-1 opacity-5">logout</i>
                 Logout
               </button>
             </form>

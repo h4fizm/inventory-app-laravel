@@ -66,7 +66,7 @@
                   </div>
                   <p class="mt-4 text-sm text-center">
                     Belum punya akun ?
-                    <a href="/register" class="text-primary text-gradient font-weight-bold">Register Disini</a>
+                    <a href="/auth/register" class="text-primary text-gradient font-weight-bold">Register Disini</a>
                   </p>
                 </form>
               </div>

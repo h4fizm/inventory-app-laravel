@@ -56,7 +56,8 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ Request::is('menu/edit-profil') ? 'active bg-gradient-dark text-white' : 'text-dark' }}" href="{{ url('/menu/edit-profil') }}">
+                {{-- Perbaikan: Ganti url() dengan route() untuk mengarah ke rute yang benar --}}
+                <a class="nav-link {{ Request::is('profile/edit') ? 'active bg-gradient-dark text-white' : 'text-dark' }}" href="{{ route('profile.edit') }}">
                     <i class="material-symbols-rounded opacity-5">person</i>
                     <span class="nav-link-text ms-1">Edit Profil</span>
                 </a>
