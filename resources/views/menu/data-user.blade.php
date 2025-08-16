@@ -50,9 +50,23 @@
 <div class="row mt-4">
     <div class="col-12">
         <div class="card p-3">
-            <div class="d-flex justify-content-between align-items-center mb-3">
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
                 <h5 class="mb-0">Daftar User</h5>
-                <button type="button" class="btn btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#tambahUserModal">+ Tambah User</button>
+                <div class="d-flex align-items-center flex-wrap">
+                    <div class="d-flex align-items-center me-3 mb-2 mb-md-0">
+                        <label for="tanggal_mulai" class="form-label mb-0 me-2">Dari</label>
+                        <input type="date" class="form-control" id="tanggal_mulai">
+                    </div>
+                    <div class="d-flex align-items-center me-3 mb-2 mb-md-0">
+                        <label for="tanggal_akhir" class="form-label mb-0 me-2">Hingga</label>
+                        <input type="date" class="form-control" id="tanggal_akhir">
+                    </div>
+                    <div class="input-group w-auto me-3 mb-2 mb-md-0">
+                        <span class="input-group-text"><i class="material-symbols-rounded opacity-10">search</i></span>
+                        <input type="text" class="form-control" id="search-input" placeholder="Cari...">
+                    </div>
+                    <button type="button" class="btn btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#tambahUserModal">+ Tambah User</button>
+                </div>
             </div>
             
             <div class="table-responsive p-0">
@@ -69,12 +83,12 @@
                     </thead>
                     <tbody>
                         @forelse($users as $index => $user)
-                        <tr class="data-row">
+                        <tr class="data-row" data-row-id="{{ $user->id }}" data-tanggal-update="{{ \Carbon\Carbon::parse($user->updated_at)->format('Y-m-d') }}">
                             <td><p class="text-xs font-weight-bold mb-0 text-start">{{ $index + 1 }}</p></td>
                             <td class="nama_user_td"><p class="text-xs font-weight-bold mb-0 text-start">{{ $user->name }}</p></td>
                             <td class="email_td"><p class="text-xs font-weight-bold mb-0 text-start">{{ $user->email }}</p></td>
                             <td class="role_td text-center"><p class="text-xs font-weight-bold mb-0">{{ $user->getRoleNames()->first() }}</p></td>
-                            <td class="text-center">
+                            <td class="tanggal_update_td text-center">
                                 <p class="text-xs font-weight-bold mb-0">{{ \Carbon\Carbon::parse($user->updated_at)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</p>
                             </td>
                             <td class="text-center">
@@ -88,18 +102,41 @@
                             </td>
                         </tr>
                         @empty
-                        <tr>
+                        {{-- Baris ini akan ditampilkan jika data tidak ada --}}
+                        <tr id="no-data-row">
                             <td colspan="6" class="text-center text-secondary">Tidak ada user yang ditemukan.</td>
                         </tr>
                         @endforelse
+                        {{-- Baris ini akan digunakan oleh JS saat filter/search tidak ada hasil --}}
+                        <tr id="no-data-row-js" style="display: none;">
+                            <td colspan="6" class="text-center text-secondary">Data Tidak Ditemukan.</td>
+                        </tr>
                     </tbody>
                 </table>
+            </div>
+            <div class="d-flex justify-content-end mt-3">
+                <nav aria-label="Page navigation example">
+                    <ul class="pagination" id="user-pagination">
+                        <li class="page-item" id="first-page">
+                            <a class="page-link" href="#">&laquo;</a>
+                        </li>
+                        <li class="page-item" id="prev-page">
+                            <a class="page-link" href="#" tabindex="-1" aria-disabled="true">&lt;</a>
+                        </li>
+                        <div id="page-numbers" class="d-flex"></div>
+                        <li class="page-item" id="next-page">
+                            <a class="page-link" href="#">&gt;</a>
+                        </li>
+                        <li class="page-item" id="last-page">
+                            <a class="page-link" href="#">&raquo;</a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Modal Tambah User -->
 <div class="modal fade" id="tambahUserModal" tabindex="-1" aria-labelledby="tambahUserModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -154,7 +191,6 @@
     </div>
 </div>
 
-<!-- Modal Edit User -->
 @foreach($users as $user)
 <div class="modal fade" id="editUserModal{{ $user->id }}" tabindex="-1" aria-labelledby="editUserModalLabel{{ $user->id }}" aria-hidden="true">
     <div class="modal-dialog">
@@ -210,58 +246,182 @@
 </div>
 @endforeach
 
-<!-- SweetAlert2 -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const tambahModal = document.getElementById('tambahUserModal');
-    if (tambahModal) {
-        tambahModal.addEventListener('input', function(e) {
-            const parent = e.target.closest('.input-group');
-            if (parent) {
-                if (e.target.value.trim() !== '') {
-                    parent.classList.add('is-filled');
-                } else {
-                    parent.classList.remove('is-filled');
-                }
+    document.addEventListener('DOMContentLoaded', function() {
+        const tableBody = document.querySelector('.table tbody');
+        const paginationList = document.getElementById('user-pagination');
+        const pageNumbersContainer = document.getElementById('page-numbers');
+        const searchInput = document.getElementById('search-input');
+        const tanggalMulaiInput = document.getElementById('tanggal_mulai');
+        const tanggalAkhirInput = document.getElementById('tanggal_akhir');
+        
+        const allRows = Array.from(tableBody.querySelectorAll('tr.data-row'));
+        const noDataRowPHP = document.getElementById('no-data-row');
+        const noDataRowJS = document.getElementById('no-data-row-js');
+        const rowsPerPage = 10;
+        let currentPage = 1;
+        let visibleRows = [];
+
+        // Fungsi untuk membersihkan backdrop modal
+        function cleanupModalBackdrops() {
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(backdrop => backdrop.remove());
+            document.body.classList.remove('modal-open');
+            document.body.style.overflow = '';
+            document.body.style.paddingRight = '';
+        }
+
+        // Fungsi untuk menutup modal dan membersihkan backdrop
+        function closeModalWithCleanup(modalElement) {
+            const modal = bootstrap.Modal.getInstance(modalElement);
+            modal.hide();
+            
+            modalElement.addEventListener('hidden.bs.modal', function handler() {
+                cleanupModalBackdrops();
+                modalElement.removeEventListener('hidden.bs.modal', handler);
+            }, { once: true });
+        }
+
+        function updateVisibleRows() {
+            const searchQuery = searchInput.value.toLowerCase();
+            const startDate = tanggalMulaiInput.value;
+            const endDate = tanggalAkhirInput.value;
+
+            visibleRows = allRows.filter(row => {
+                const rowText = row.textContent.toLowerCase();
+                const rowDate = row.getAttribute('data-tanggal-update');
+                const searchMatch = rowText.includes(searchQuery);
+                let dateMatch = (!startDate || rowDate >= startDate) && (!endDate || rowDate <= endDate);
+                return searchMatch && dateMatch;
+            });
+        }
+        
+        function showPage(page) {
+            const start = (page - 1) * rowsPerPage;
+            const end = start + rowsPerPage;
+
+            allRows.forEach(row => row.style.display = 'none');
+            for (let i = start; i < end && i < visibleRows.length; i++) {
+                visibleRows[i].style.display = '';
             }
+        }
+        
+        function renderPagination() {
+            const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+            pageNumbersContainer.innerHTML = '';
+            for (let i = 1; i <= totalPages; i++) {
+                const li = document.createElement('li');
+                li.className = `page-item${i === currentPage ? ' active' : ''}`;
+                li.setAttribute('data-page', i);
+                li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
+                pageNumbersContainer.appendChild(li);
+            }
+
+            const firstPageBtn = document.getElementById('first-page');
+            const prevPageBtn = document.getElementById('prev-page');
+            const nextPageBtn = document.getElementById('next-page');
+            const lastPageBtn = document.getElementById('last-page');
+            
+            firstPageBtn.classList.toggle('disabled', currentPage === 1 || totalPages === 0);
+            prevPageBtn.classList.toggle('disabled', currentPage === 1 || totalPages === 0);
+            nextPageBtn.classList.toggle('disabled', currentPage === totalPages || totalPages === 0);
+            lastPageBtn.classList.toggle('disabled', currentPage === totalPages || totalPages === 0);
+            
+            // Logika menampilkan atau menyembunyikan pesan "Data Tidak Ditemukan"
+            if (noDataRowPHP) {
+                noDataRowPHP.style.display = 'none'; // Selalu sembunyikan yang dari PHP
+            }
+            if (noDataRowJS) {
+                noDataRowJS.style.display = visibleRows.length === 0 ? '' : 'none';
+            }
+
+            paginationList.style.display = visibleRows.length === 0 ? 'none' : 'flex';
+        }
+
+        function filterAndRender() {
+            updateVisibleRows();
+            currentPage = 1;
+            showPage(currentPage);
+            renderPagination();
+        }
+
+        paginationList.addEventListener('click', function(e) {
+            e.preventDefault();
+            const clickedItem = e.target.closest('.page-item');
+            if (!clickedItem || clickedItem.classList.contains('disabled') || clickedItem.classList.contains('active')) return;
+            
+            const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+            if (clickedItem.id === 'first-page') {
+                currentPage = 1;
+            } else if (clickedItem.id === 'last-page') {
+                currentPage = totalPages;
+            } else if (clickedItem.id === 'prev-page') {
+                currentPage = Math.max(1, currentPage - 1);
+            } else if (clickedItem.id === 'next-page') {
+                currentPage = Math.min(totalPages, currentPage + 1);
+            } else {
+                currentPage = parseInt(clickedItem.getAttribute('data-page'));
+            }
+
+            showPage(currentPage);
+            renderPagination();
         });
-    }
-
-    // Auto open modal jika validasi gagal
-    @if ($errors->any())
-        @if (old('form_type') == 'tambah')
-            var tambahModalInstance = new bootstrap.Modal(document.getElementById('tambahUserModal'));
-            tambahModalInstance.show();
-        @elseif (old('form_type') == 'edit')
-            var editModalInstance = new bootstrap.Modal(document.getElementById('editUserModal' + {{ old('user_id') }}));
-            editModalInstance.show();
-        @endif
-    @endif
-
-    // SweetAlert konfirmasi delete
-    document.querySelectorAll('.btn-delete').forEach(function(button) {
-        button.addEventListener('click', function(e) {
-            let form = this.closest('form');
-            let username = this.dataset.username;
-
-            Swal.fire({
-                title: 'Yakin hapus?',
-                text: `User "${username}" akan dihapus permanen.`,
-                icon: 'warning',
-                showCancelButton: true,
-                confirmButtonColor: '#d33',
-                cancelButtonColor: '#6c757d',
-                confirmButtonText: 'Ya, hapus!',
-                cancelButtonText: 'Batal'
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    form.submit();
+        
+        const tambahModal = document.getElementById('tambahUserModal');
+        if (tambahModal) {
+            tambahModal.addEventListener('input', function(e) {
+                const parent = e.target.closest('.input-group');
+                if (parent) {
+                    if (e.target.value.trim() !== '') {
+                        parent.classList.add('is-filled');
+                    } else {
+                        parent.classList.remove('is-filled');
+                    }
                 }
             });
+        }
+
+        // Auto open modal jika validasi gagal
+        @if ($errors->any())
+            @if (old('form_type') == 'tambah')
+                var tambahModalInstance = new bootstrap.Modal(document.getElementById('tambahUserModal'));
+                tambahModalInstance.show();
+            @elseif (old('form_type') == 'edit')
+                var editModalInstance = new bootstrap.Modal(document.getElementById('editUserModal' + {{ old('user_id') }}));
+                editModalInstance.show();
+            @endif
+        @endif
+
+        // SweetAlert konfirmasi delete
+        document.querySelectorAll('.btn-delete').forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                let form = this.closest('form');
+                let username = this.dataset.username;
+
+                Swal.fire({
+                    title: 'Yakin hapus?',
+                    text: `User "${username}" akan dihapus permanen.`,
+                    icon: 'warning',
+                    showCancelButton: true,
+                    confirmButtonColor: '#d33',
+                    cancelButtonColor: '#6c757d',
+                    confirmButtonText: 'Ya, hapus!',
+                    cancelButtonText: 'Batal'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        form.submit();
+                    }
+                });
+            });
         });
+
+        searchInput.addEventListener('keyup', filterAndRender);
+        tanggalMulaiInput.addEventListener('change', filterAndRender);
+        tanggalAkhirInput.addEventListener('change', filterAndRender);
+        
+        filterAndRender();
     });
-});
 </script>
 
 @endsection

@@ -69,37 +69,23 @@
                     </thead>
                     <tbody>
                         @php
-                        $data_kategori = [
-                            ['nama_kategori' => 'Aksesoris PC', 'tanggal_update' => '2025-08-10'],
-                            ['nama_kategori' => 'Komponen PC', 'tanggal_update' => '2025-08-11'],
-                            ['nama_kategori' => 'Hardware', 'tanggal_update' => '2025-08-12'],
-                            ['nama_kategori' => 'Periferal', 'tanggal_update' => '2025-08-13'],
-                            ['nama_kategori' => 'Audio', 'tanggal_update' => '2025-08-10'],
-                            ['nama_kategori' => 'Penyimpanan', 'tanggal_update' => '2025-08-11'],
-                            ['nama_kategori' => 'Kabel & Adaptor', 'tanggal_update' => '2025-08-12'],
-                            ['nama_kategori' => 'Software', 'tanggal_update' => '2025-08-13'],
-                            ['nama_kategori' => 'Jaringan', 'tanggal_update' => '2025-08-10'],
-                            ['nama_kategori' => 'Server', 'tanggal_update' => '2025-08-11'],
-                            ['nama_kategori' => 'Laptop', 'tanggal_update' => '2025-08-12'],
-                            ['nama_kategori' => 'Smartphone', 'tanggal_update' => '2025-08-13'],
-                        ];
-                        $rowsPerPage = 5; 
+                        $rowsPerPage = 5;
                         
                         $hari_indonesia = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
                         $bulan_indonesia = ['January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret', 'April' => 'April', 'May' => 'Mei', 'June' => 'Juni', 'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September', 'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'];
                         @endphp
-                        @foreach($data_kategori as $index => $item)
+                        @forelse($data_kategori as $index => $item)
                         @php
-                            $tanggal_obj = date_create($item['tanggal_update']);
+                            $tanggal_obj = date_create($item->updated_at->toDateString());
                             $tanggal_terformat = str_replace(array_keys($hari_indonesia), array_values($hari_indonesia), $tanggal_obj->format('l'));
                             $tanggal_terformat .= ', ' . $tanggal_obj->format('d');
                             $tanggal_terformat .= ' ' . str_replace(array_keys($bulan_indonesia), array_values($bulan_indonesia), $tanggal_obj->format('F'));
                             $tanggal_terformat .= ' ' . $tanggal_obj->format('Y');
                         @endphp
-                        <tr class="data-row" data-page="{{ floor($index / $rowsPerPage) + 1 }}" data-row-id="{{ $index }}" style="display: {{ (floor($index / $rowsPerPage) + 1) == 1 ? '' : 'none' }}">
+                        <tr class="data-row" data-page="{{ floor($index / $rowsPerPage) + 1 }}" data-row-id="{{ $index }}" data-original-date="{{ $item->updated_at->toDateString() }}" style="display: {{ (floor($index / $rowsPerPage) + 1) == 1 ? '' : 'none' }}">
                             <td><p class="text-xs font-weight-bold mb-0">{{ $index + 1 }}</p></td>
-                            <td class="nama_kategori_td"><p class="text-xs font-weight-bold mb-0">{{ $item['nama_kategori'] }}</p></td>
-                            <td class="text-center tanggal-update" data-original-date="{{ $item['tanggal_update'] }}">
+                            <td class="nama_kategori_td"><p class="text-xs font-weight-bold mb-0">{{ $item->nama_kategori }}</p></td>
+                            <td class="text-center tanggal-update" data-original-date="{{ $item->updated_at->toDateString() }}">
                                 <p class="text-xs font-weight-bold mb-0">{{ $tanggal_terformat }}</p>
                             </td>
                             <td class="text-center">
@@ -107,10 +93,11 @@
                                 <a href="#" class="btn btn-sm btn-danger mb-0 delete-btn">Delete</a>
                             </td>
                         </tr>
-                        @endforeach
+                        @empty
                         <tr id="no-data-row" style="display: none;">
                             <td colspan="4" class="text-center text-secondary">Kategori tidak ditemukan.</td>
                         </tr>
+                        @endforelse
                     </tbody>
                 </table>
             </div>

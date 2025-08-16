@@ -4,6 +4,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\UserController;
 
 // Login & Register
@@ -32,10 +33,12 @@ Route::middleware('auth')->group(function () {
 
         // Create items
         Route::get('/tambah-barang', fn() => view('menu.tambah-barang'))
-            ->middleware('permission:create items')->name('tambah-barang');
+            ->middleware('permission:create items')
+            ->name('tambah-barang');
 
-        Route::get('/tambah-kategori', fn() => view('menu.tambah-kategori'))
-            ->middleware('permission:create categories')->name('tambah-kategori');
+        Route::middleware('permission:view categories|create categories|edit categories|delete categories')->group(function () {
+            Route::get('/manage-kategori', [KategoriController::class, 'index'])->name('menu.tambah-kategori');
+        });
 
         // Manage users
         Route::middleware('permission:manage users')->group(function () {

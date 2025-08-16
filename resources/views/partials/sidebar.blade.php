@@ -37,7 +37,7 @@
                 </a>
             </li>
             <li class="nav-item">
-                <a class="nav-link {{ Request::is('menu/tambah-kategori') ? 'active bg-gradient-dark text-white' : 'text-dark' }}" href="{{ url('/menu/tambah-kategori') }}">
+                <a class="nav-link {{ Request::is('menu/manage-kategori') ? 'active bg-gradient-dark text-white' : 'text-dark' }}" href="{{ url('/menu/manage-kategori') }}">
                     <i class="material-symbols-rounded opacity-5">category</i>
                     <span class="nav-link-text ms-1">Tambah Kategori</span>
                 </a>
