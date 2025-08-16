@@ -4,6 +4,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\BarangController;
@@ -48,8 +49,10 @@ Route::middleware('auth')->group(function () {
 
         // Permission untuk melihat data barang
         Route::middleware('permission:view items')->group(function () {
-            Route::get('/dashboard', fn() => view('menu.dashboard'))->name('dashboard');
-            Route::get('/preview-barang', fn() => view('menu.preview-barang'))->name('preview-barang');
+            // Ubah rute dashboard
+            Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+            // Tambahkan rute untuk preview barang dengan parameter ID
+            Route::get('/preview-barang/{barang}', [DashboardController::class, 'preview'])->name('preview-barang');
             Route::get('/data-barang', [BarangController::class, 'index'])->name('data-barang');
         });
 

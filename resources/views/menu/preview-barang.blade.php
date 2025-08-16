@@ -34,13 +34,13 @@
                     <div class="col-md-6 mb-3">
                         <div class="input-group input-group-outline my-3 is-filled">
                             <label class="form-label">Nama Barang</label>
-                            <input type="text" class="form-control" value="Keyboard Mekanik RGB" readonly>
+                            <input type="text" class="form-control" value="{{ $barang->nama_barang }}" readonly>
                         </div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <div class="input-group input-group-outline my-3 is-filled">
                             <label class="form-label">Nama Kategori</label>
-                            <input type="text" class="form-control" value="Aksesoris PC" readonly>
+                            <input type="text" class="form-control" value="{{ $barang->kategori->nama_kategori ?? 'N/A' }}" readonly>
                         </div>
                     </div>
                 </div>
@@ -48,13 +48,13 @@
                     <div class="col-md-6 mb-3">
                         <div class="input-group input-group-outline my-3 is-filled">
                             <label class="form-label">Kode Barang</label>
-                            <input type="text" class="form-control" value="KB-001" readonly>
+                            <input type="text" class="form-control" value="{{ $barang->kode_barang }}" readonly>
                         </div>
                     </div>
                     <div class="col-md-6 mb-3">
                         <div class="input-group input-group-outline my-3 is-filled">
                             <label class="form-label">Jumlah Barang</label>
-                            <input type="number" class="form-control" value="12" readonly>
+                            <input type="number" class="form-control" value="{{ $barang->jumlah_barang }}" readonly>
                         </div>
                     </div>
                 </div>
@@ -68,44 +68,55 @@
         <div class="card p-3">
             <h5 class="mb-3">Lokasi Barang</h5>
             <div class="row">
+                <div class="col-12 mb-3">
+                    <div class="input-group input-group-outline my-3 is-filled">
+                        <label class="form-label">Nama Lokasi Barang</label>
+                        <input type="text" class="form-control" value="{{ $barang->lokasi_barang }}" readonly>
+                    </div>
+                </div>
                 <div class="col-md-6 mb-3">
                     <div class="input-group input-group-outline my-3 is-filled">
                         <label class="form-label">Latitude</label>
-                        <input type="text" class="form-control" id="latitude" value="-7.257500" readonly>
+                        <input type="text" class="form-control" id="latitude" value="{{ $barang->latitude }}" readonly>
                     </div>
                 </div>
                 <div class="col-md-6 mb-3">
                     <div class="input-group input-group-outline my-3 is-filled">
                         <label class="form-label">Longitude</label>
-                        <input type="text" class="form-control" id="longitude" value="112.752100" readonly>
+                        <input type="text" class="form-control" id="longitude" value="{{ $barang->longitude }}" readonly>
                     </div>
                 </div>
                 <div class="col-12">
                     <div id="map"></div>
                 </div>
             </div>
+            
+            {{-- Pindahkan tombol "Kembali" ke dalam card ini --}}
+            <div class="row mt-4">
+                <div class="col-12 text-end">
+                    <a href="{{ route('dashboard') }}" class="btn btn-secondary">Kembali</a>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
-
-<div class="row mt-4">
-    <div class="col-12 text-end">
-        <a href="/menu/dashboard" class="btn btn-secondary">Kembali</a>
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const map = L.map('map').setView([-7.2575, 112.7521], 13);
+        const latitude = parseFloat(document.getElementById('latitude').value);
+        const longitude = parseFloat(document.getElementById('longitude').value);
+        const namaBarang = "{{ $barang->nama_barang }}";
+        const lokasiBarang = "{{ $barang->lokasi_barang }}";
+
+        const map = L.map('map').setView([latitude, longitude], 13);
 
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
         }).addTo(map);
 
-        // Tambahkan marker di lokasi dummy
-        L.marker([-7.2575, 112.7521]).addTo(map)
-            .bindPopup('Lokasi Barang')
+        L.marker([latitude, longitude]).addTo(map)
+            .bindPopup(`<b>${lokasiBarang}</b><br>${namaBarang}`)
             .openPopup();
 
         setTimeout(function() {

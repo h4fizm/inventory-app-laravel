@@ -49,12 +49,15 @@
                 </h6>
             </li>
             
+            {{-- Menggunakan @hasrole untuk menyembunyikan menu dari user biasa --}}
+            @hasrole('admin')
             <li class="nav-item">
                 <a class="nav-link {{ Request::is('menu/data-user') ? 'active bg-gradient-dark text-white' : 'text-dark' }}" href="{{ url('/menu/data-user') }}">
                     <i class="material-symbols-rounded opacity-5">group</i>
                     <span class="nav-link-text ms-1">Manage User</span>
                 </a>
             </li>
+            @endhasrole
             <li class="nav-item">
                 {{-- Perbaikan: Ganti url() dengan route() untuk mengarah ke rute yang benar --}}
                 <a class="nav-link {{ Request::is('profile/edit') ? 'active bg-gradient-dark text-white' : 'text-dark' }}" href="{{ route('profile.edit') }}">
