@@ -37,6 +37,11 @@
     .pagination .page-item.disabled .page-link span {
         color: #6c757d; /* Memastikan ikon panah berwarna abu-abu saat disabled */
     }
+    /* Tambahan CSS untuk memperbaiki scroll pada modal */
+    .modal-open .modal {
+        overflow-x: hidden;
+        overflow-y: auto;
+    }
 </style>
 
 <div class="row">
@@ -118,10 +123,14 @@
                                     <td class="text-center"><p class="text-xs font-weight-bold mb-0">{{ $item->jumlah_barang }}</p></td>
                                     <td class="text-center"><p class="text-xs font-weight-bold mb-0">{{ $item->lokasi_barang }}</p></td>
                                     <td class="text-center">
-                                         <p class="text-xs font-weight-bold mb-0">{{ \Carbon\Carbon::parse($item->updated_at)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</p>
+                                        <p class="text-xs font-weight-bold mb-0">{{ \Carbon\Carbon::parse($item->updated_at)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</p>
                                     </td>
                                     <td class="text-center">
-                                        <a href="#" class="btn btn-sm btn-dark mb-0 lokasi-btn" data-bs-toggle="modal" data-bs-target="#lokasiModal" data-latitude="{{ $item->latitude }}" data-longitude="{{ $item->longitude }}">Lokasi</a>
+                                        <a href="#" class="btn btn-sm btn-dark mb-0 lokasi-btn" data-bs-toggle="modal" data-bs-target="#lokasiModal"
+                                            data-latitude="{{ $item->latitude }}"
+                                            data-longitude="{{ $item->longitude }}"
+                                            data-lokasi-barang="{{ $item->lokasi_barang }}"
+                                        >Lokasi</a>
                                         <a href="#" class="btn btn-sm btn-warning mb-0 edit-btn"
                                             data-bs-toggle="modal"
                                             data-bs-target="#editBarangModal"
@@ -219,21 +228,29 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-                <form id="lokasiForm">
+                <form id="lokasiForm" method="POST">
+                    @csrf
+                    @method('PUT')
                     <input type="hidden" id="lokasi_row_id">
                     <p class="text-sm text-secondary">Klik pada peta untuk menentukan lokasi baru.</p>
                     <div id="map-lokasi" class="mb-3"></div>
                     <div class="row">
+                        <div class="col-12 mb-3">
+                            <div class="input-group input-group-outline my-3">
+                                <label for="lokasi_barang_input" class="form-label">Nama Lokasi Barang</label>
+                                <input type="text" class="form-control" id="lokasi_barang_input" name="lokasi_barang" required>
+                            </div>
+                        </div>
                         <div class="col-md-6 mb-3">
                             <div class="input-group input-group-outline my-3">
                                 <label for="lokasi_latitude" class="form-label">Latitude</label>
-                                <input type="text" class="form-control" id="lokasi_latitude" readonly>
+                                <input type="text" class="form-control" id="lokasi_latitude" name="latitude" readonly required>
                             </div>
                         </div>
                         <div class="col-md-6 mb-3">
                             <div class="input-group input-group-outline my-3">
                                 <label for="lokasi_longitude" class="form-label">Longitude</label>
-                                <input type="text" class="form-control" id="lokasi_longitude" readonly>
+                                <input type="text" class="form-control" id="lokasi_longitude" name="longitude" readonly required>
                             </div>
                         </div>
                     </div>
@@ -463,10 +480,12 @@
 
             if (btn.classList.contains('lokasi-btn')) {
                 const namaBarang = row.querySelector('.nama-barang-cell').textContent;
+                const lokasiBarang = btn.getAttribute('data-lokasi-barang');
                 const latitude = parseFloat(btn.getAttribute('data-latitude'));
                 const longitude = parseFloat(btn.getAttribute('data-longitude'));
                 
                 document.getElementById('lokasi-nama-barang').textContent = namaBarang;
+                document.getElementById('lokasi_barang_input').value = lokasiBarang;
                 document.getElementById('lokasi_latitude').value = latitude.toFixed(6);
                 document.getElementById('lokasi_longitude').value = longitude.toFixed(6);
                 document.getElementById('lokasi_row_id').value = itemId;
@@ -491,6 +510,7 @@
             const itemId = document.getElementById('lokasi_row_id').value;
             const row = document.querySelector(`tr[data-id="${itemId}"]`);
             const namaBarang = row.querySelector('.nama-barang-cell').textContent;
+            const lokasiBarang = row.querySelector('.lokasi-btn').getAttribute('data-lokasi-barang');
             const latitude = parseFloat(row.querySelector('.lokasi-btn').getAttribute('data-latitude'));
             const longitude = parseFloat(row.querySelector('.lokasi-btn').getAttribute('data-longitude'));
             
@@ -507,14 +527,15 @@
             if (mapMarker) {
                 mapMarker.remove();
             }
-            mapMarker = L.marker([latitude, longitude]).addTo(mapLokasi).bindPopup(namaBarang).openPopup();
+            const popupContent = `<b>${lokasiBarang}</b><br>${namaBarang}`;
+            mapMarker = L.marker([latitude, longitude]).addTo(mapLokasi).bindPopup(popupContent).openPopup();
 
             mapLokasi.on('click', function(e) {
                 const newLatlng = e.latlng;
                 if (mapMarker) {
                     mapMarker.setLatLng(newLatlng);
                 } else {
-                    mapMarker = L.marker(newLatlng).addTo(mapLokasi).bindPopup(namaBarang).openPopup();
+                    mapMarker = L.marker(newLatlng).addTo(mapLokasi).bindPopup(popupContent).openPopup();
                 }
                 document.getElementById('lokasi_latitude').value = newLatlng.lat.toFixed(6);
                 document.getElementById('lokasi_longitude').value = newLatlng.lng.toFixed(6);
@@ -526,11 +547,21 @@
                 mapLokasi.invalidateSize();
             }, 300);
         });
+        
+        // Tambahkan event listener untuk tombol Simpan Lokasi
+        document.getElementById('saveLokasiBtn').addEventListener('click', function() {
+            const form = document.getElementById('lokasiForm');
+            const itemId = document.getElementById('lokasi_row_id').value;
+            form.action = `{{ route('data-barang.update', ['barang' => 'TEMP_ID']) }}`.replace('TEMP_ID', itemId);
+            form.submit();
+        });
 
+        // Hapus `hidden.bs.modal` dan `cleanupModalBackdrops`
+        // Agar modal-open class tidak di hapus sehingga scrolling di body di biarkan
         document.querySelectorAll('.modal').forEach(modal => {
-            modal.addEventListener('hidden.bs.modal', function() {
-                cleanupModalBackdrops();
-            });
+             // modal.addEventListener('hidden.bs.modal', function() {
+             //     cleanupModalBackdrops();
+             // });
         });
 
         searchInput.addEventListener('keyup', filterAndRender);

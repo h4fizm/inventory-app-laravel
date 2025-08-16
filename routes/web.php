@@ -53,6 +53,12 @@ Route::middleware('auth')->group(function () {
             Route::get('/data-barang', [BarangController::class, 'index'])->name('data-barang');
         });
 
+        // Permission untuk menambah data barang
+        Route::middleware('permission:create items')->group(function () {
+            Route::get('/tambah-barang', [BarangController::class, 'create'])->name('tambah-barang');
+            Route::post('/tambah-barang', [BarangController::class, 'store'])->name('tambah-barang.store');
+        });
+
         // Permission untuk mengedit data barang
         Route::middleware('permission:edit items')->group(function () {
             // Mengganti parameter {id} menjadi {barang} untuk konsistensi dengan Route Model Binding
