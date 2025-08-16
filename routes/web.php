@@ -36,8 +36,12 @@ Route::middleware('auth')->group(function () {
             ->middleware('permission:create items')
             ->name('tambah-barang');
 
+        // Manage categories
         Route::middleware('permission:view categories|create categories|edit categories|delete categories')->group(function () {
-            Route::get('/manage-kategori', [KategoriController::class, 'index'])->name('menu.tambah-kategori');
+            Route::get('/manage-kategori', [KategoriController::class, 'index'])->name('kategori.index');
+            Route::post('/manage-kategori', [KategoriController::class, 'store'])->name('kategori.store');
+            Route::put('/manage-kategori/{id}', [KategoriController::class, 'update'])->name('kategori.update');
+            Route::delete('/manage-kategori/{id}', [KategoriController::class, 'destroy'])->name('kategori.destroy');
         });
 
         // Manage users

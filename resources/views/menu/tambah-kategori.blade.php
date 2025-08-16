@@ -2,7 +2,7 @@
 @section('title', 'Manage Kategori')
 @section('content')
 
-{{-- CSS untuk kustomisasi pagination --}}
+{{-- CSS untuk kustomisasi pagination dan tabel --}}
 <style>
     .pagination .page-item .page-link {
         background-color: #6c757d;
@@ -34,76 +34,93 @@
     </div>
 </div>
 
+@if(session('success'))
+    <div class="alert alert-success">{{ session('success') }}</div>
+@endif
+@if($errors->any())
+    <div class="alert alert-danger">
+        <ul class="mb-0">
+            @foreach ($errors->all() as $err)
+                <li>{{ $err }}</li>
+            @endforeach
+        </ul>
+    </div>
+@endif
+
 <div class="row mt-4">
     <div class="col-12">
         <div class="card p-3">
-            {{-- Bagian judul, filter, search, dan tombol tambah --}}
-            <div class="d-flex justify-content-between align-items-center mb-1">
+            {{-- Bagian judul, tombol tambah, dan pencarian/filter --}}
+            <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
                 <h5 class="mb-0">Daftar Kategori</h5>
-                <button type="button" class="btn btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#tambahKategoriModal">+ Tambah Kategori</button>
-            </div>
-            <div class="d-flex justify-content-end align-items-center flex-wrap mb-3">
-                <div class="d-flex align-items-center me-3 mb-2 mb-md-0">
-                    <label for="tanggal_mulai" class="form-label mb-0 me-2">Dari</label>
-                    <input type="date" class="form-control" id="tanggal_mulai">
-                </div>
-                <div class="d-flex align-items-center me-3 mb-2 mb-md-0">
-                    <label for="tanggal_akhir" class="form-label mb-0 me-2">Hingga</label>
-                    <input type="date" class="form-control" id="tanggal_akhir">
-                </div>
-                <div class="input-group w-auto me-3 mb-2 mb-md-0">
-                    <span class="input-group-text"><i class="material-symbols-rounded opacity-10">search</i></span>
-                    <input type="text" class="form-control" id="search-input" placeholder="Cari...">
+                <div class="d-flex align-items-center flex-wrap">
+                    {{-- Filter Tanggal --}}
+                    <div class="d-flex align-items-center me-3 mb-2 mb-md-0">
+                        <label for="tanggal_mulai" class="form-label mb-0 me-2">Dari</label>
+                        <input type="date" class="form-control" id="tanggal_mulai">
+                    </div>
+                    <div class="d-flex align-items-center me-3 mb-2 mb-md-0">
+                        <label for="tanggal_akhir" class="form-label mb-0 me-2">Hingga</label>
+                        <input type="date" class="form-control" id="tanggal_akhir">
+                    </div>
+                    {{-- Pencarian --}}
+                    <div class="input-group w-auto me-3 mb-2 mb-md-0">
+                        <span class="input-group-text"><i class="material-symbols-rounded opacity-10">search</i></span>
+                        <input type="text" class="form-control" id="search-input" placeholder="Cari...">
+                    </div>
+                    <button type="button" class="btn btn-primary mb-0" data-bs-toggle="modal" data-bs-target="#tambahKategoriModal">+ Tambah Kategori</button>
                 </div>
             </div>
             
-            <div class="table-responsive p-0">
+            <div class="table-responsive p-0 mt-3">
                 <table class="table table-striped table-hover mb-0">
                     <thead>
                         <tr>
-                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">No</th>
-                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Nama Kategori</th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-start">No</th>
+                            <th class="text-uppercase text-secondary text-xxs font-weight-bolder opacity-7 text-start">Nama Kategori</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Tgl Terakhir Update</th>
                             <th class="text-center text-uppercase text-secondary text-xxs font-weight-bolder opacity-7">Aksi</th>
                         </tr>
                     </thead>
                     <tbody>
-                        @php
-                        $rowsPerPage = 5;
-                        
-                        $hari_indonesia = ['Sunday' => 'Minggu', 'Monday' => 'Senin', 'Tuesday' => 'Selasa', 'Wednesday' => 'Rabu', 'Thursday' => 'Kamis', 'Friday' => 'Jumat', 'Saturday' => 'Sabtu'];
-                        $bulan_indonesia = ['January' => 'Januari', 'February' => 'Februari', 'March' => 'Maret', 'April' => 'April', 'May' => 'Mei', 'June' => 'Juni', 'July' => 'Juli', 'August' => 'Agustus', 'September' => 'September', 'October' => 'Oktober', 'November' => 'November', 'December' => 'Desember'];
-                        @endphp
                         @forelse($data_kategori as $index => $item)
-                        @php
-                            $tanggal_obj = date_create($item->updated_at->toDateString());
-                            $tanggal_terformat = str_replace(array_keys($hari_indonesia), array_values($hari_indonesia), $tanggal_obj->format('l'));
-                            $tanggal_terformat .= ', ' . $tanggal_obj->format('d');
-                            $tanggal_terformat .= ' ' . str_replace(array_keys($bulan_indonesia), array_values($bulan_indonesia), $tanggal_obj->format('F'));
-                            $tanggal_terformat .= ' ' . $tanggal_obj->format('Y');
-                        @endphp
-                        <tr class="data-row" data-page="{{ floor($index / $rowsPerPage) + 1 }}" data-row-id="{{ $index }}" data-original-date="{{ $item->updated_at->toDateString() }}" style="display: {{ (floor($index / $rowsPerPage) + 1) == 1 ? '' : 'none' }}">
-                            <td><p class="text-xs font-weight-bold mb-0">{{ $index + 1 }}</p></td>
-                            <td class="nama_kategori_td"><p class="text-xs font-weight-bold mb-0">{{ $item->nama_kategori }}</p></td>
-                            <td class="text-center tanggal-update" data-original-date="{{ $item->updated_at->toDateString() }}">
-                                <p class="text-xs font-weight-bold mb-0">{{ $tanggal_terformat }}</p>
+                        <tr class="data-row" data-id="{{ $item->id }}" data-tanggal-update="{{ \Carbon\Carbon::parse($item->updated_at)->format('Y-m-d') }}">
+                            <td><p class="text-xs font-weight-bold mb-0 text-start">{{ $index + 1 }}</p></td>
+                            <td class="nama_kategori_td"><p class="text-xs font-weight-bold mb-0 text-start">{{ $item->nama_kategori }}</p></td>
+                            <td class="tanggal_update_td text-center">
+                                <p class="text-xs font-weight-bold mb-0">{{ \Carbon\Carbon::parse($item->updated_at)->locale('id')->isoFormat('dddd, D MMMM YYYY') }}</p>
                             </td>
                             <td class="text-center">
-                                <a href="#" class="btn btn-sm btn-warning mb-0 edit-btn" data-bs-toggle="modal" data-bs-target="#editKategoriModal">Edit</a>
-                                <a href="#" class="btn btn-sm btn-danger mb-0 delete-btn">Delete</a>
+                                <button type="button" class="btn btn-sm btn-warning mb-0 edit-btn" 
+                                    data-bs-toggle="modal" 
+                                    data-bs-target="#editKategoriModal"
+                                    data-id="{{ $item->id }}"
+                                    data-nama="{{ $item->nama_kategori }}">
+                                    Edit
+                                </button>
+
+                                <form action="{{ route('kategori.destroy', $item->id) }}" method="POST" class="d-inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="button" class="btn btn-sm btn-danger mb-0 btn-delete" data-kategori-nama="{{ $item->nama_kategori }}">Delete</button>
+                                </form>
                             </td>
                         </tr>
                         @empty
-                        <tr id="no-data-row" style="display: none;">
+                        <tr id="no-data-row-php">
                             <td colspan="4" class="text-center text-secondary">Kategori tidak ditemukan.</td>
                         </tr>
                         @endforelse
+                        <tr id="no-data-row-js" style="display: none;">
+                            <td colspan="4" class="text-center text-secondary">Data Tidak Ditemukan.</td>
+                        </tr>
                     </tbody>
                 </table>
             </div>
+            {{-- Pagination HTML --}}
             <div class="d-flex justify-content-end mt-3">
                 <nav aria-label="Page navigation example">
-                    <ul class="pagination">
+                    <ul class="pagination" id="kategori-pagination">
                         <li class="page-item" id="first-page">
                             <a class="page-link" href="#">&laquo;</a>
                         </li>
@@ -132,18 +149,19 @@
                 <h5 class="modal-title" id="tambahKategoriModalLabel">Tambah Kategori</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <form id="tambahKategoriForm">
-                    <div class="input-group input-group-outline mb-3">
+            <form action="{{ route('kategori.store') }}" method="POST">
+                @csrf
+                <div class="modal-body">
+                    <div class="mb-3">
                         <label for="tambah_nama_kategori" class="form-label">Nama Kategori</label>
-                        <input type="text" class="form-control" id="tambah_nama_kategori" required>
+                        <input type="text" class="form-control" id="tambah_nama_kategori" name="nama_kategori" required>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                <button type="button" class="btn btn-primary" id="saveTambahKategoriBtn">Simpan</button>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary">Simpan</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -156,19 +174,20 @@
                 <h5 class="modal-title" id="editKategoriModalLabel">Edit Kategori</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body">
-                <form id="editKategoriForm">
-                    <input type="hidden" id="edit_row_id">
-                    <div class="input-group input-group-outline mb-3">
+           <form id="editKategoriForm" method="POST">
+                @csrf
+                @method('PUT')
+                <div class="modal-body">
+                    <div class="mb-3">
                         <label for="edit_nama_kategori" class="form-label">Nama Kategori</label>
-                        <input type="text" class="form-control" id="edit_nama_kategori">
+                        <input type="text" class="form-control" id="edit_nama_kategori" name="nama_kategori" required>
                     </div>
-                </form>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
-                <button type="button" class="btn btn-primary" id="saveChangesBtn">Simpan Perubahan</button>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+                    <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
@@ -177,19 +196,16 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const tableBody = document.querySelector('.table tbody');
-        const paginationList = document.querySelector('.pagination');
+        const paginationList = document.getElementById('kategori-pagination');
         const pageNumbersContainer = document.getElementById('page-numbers');
-        const firstPageBtn = document.getElementById('first-page');
-        const prevPageBtn = document.getElementById('prev-page');
-        const nextPageBtn = document.getElementById('next-page');
-        const lastPageBtn = document.getElementById('last-page');
         const searchInput = document.getElementById('search-input');
         const tanggalMulaiInput = document.getElementById('tanggal_mulai');
         const tanggalAkhirInput = document.getElementById('tanggal_akhir');
         
-        let rows = tableBody.querySelectorAll('tr.data-row');
-        const noDataRow = document.getElementById('no-data-row');
-        const rowsPerPage = 5;
+        const allRows = Array.from(tableBody.querySelectorAll('tr.data-row'));
+        const noDataRowPHP = document.getElementById('no-data-row-php');
+        const noDataRowJS = document.getElementById('no-data-row-js');
+        const rowsPerPage = 10;
         let currentPage = 1;
         let visibleRows = [];
 
@@ -197,100 +213,74 @@
             const searchQuery = searchInput.value.toLowerCase();
             const startDate = tanggalMulaiInput.value;
             const endDate = tanggalAkhirInput.value;
-
-            visibleRows = Array.from(rows).filter(row => {
+            
+            visibleRows = allRows.filter(row => {
                 const rowText = row.textContent.toLowerCase();
-                const rowDate = row.querySelector('.tanggal-update').getAttribute('data-original-date');
-                
+                const rowDate = row.getAttribute('data-tanggal-update');
                 const searchMatch = rowText.includes(searchQuery);
-                let dateMatch = true;
-                
-                if (startDate && rowDate < startDate) {
-                    dateMatch = false;
-                }
-                if (endDate && rowDate > endDate) {
-                    dateMatch = false;
-                }
-                
+                let dateMatch = (!startDate || rowDate >= startDate) && (!endDate || rowDate <= endDate);
                 return searchMatch && dateMatch;
             });
-            
-            if (visibleRows.length === 0) {
-                noDataRow.style.display = '';
-                paginationList.style.display = 'none';
-            } else {
-                noDataRow.style.display = 'none';
-                paginationList.style.display = 'flex';
-            }
         }
         
         function showPage(page) {
             const start = (page - 1) * rowsPerPage;
             const end = start + rowsPerPage;
+            let currentNumber = start + 1;
 
-            rows.forEach(row => row.style.display = 'none');
+            allRows.forEach(row => row.style.display = 'none');
             for (let i = start; i < end && i < visibleRows.length; i++) {
-                visibleRows[i].style.display = '';
+                const row = visibleRows[i];
+                row.querySelector('td:first-child p').textContent = currentNumber++;
+                row.style.display = '';
             }
         }
         
-        function renderPageButtons() {
-            pageNumbersContainer.innerHTML = '';
+        function renderPagination() {
             const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+            pageNumbersContainer.innerHTML = '';
             for (let i = 1; i <= totalPages; i++) {
                 const li = document.createElement('li');
-                li.className = 'page-item';
+                li.className = `page-item${i === currentPage ? ' active' : ''}`;
                 li.setAttribute('data-page', i);
                 li.innerHTML = `<a class="page-link" href="#">${i}</a>`;
                 pageNumbersContainer.appendChild(li);
             }
-        }
 
-        function updatePaginationButtons() {
-            const paginationListItems = document.querySelectorAll('.pagination .page-item');
-            const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
+            const firstPageBtn = document.getElementById('first-page');
+            const prevPageBtn = document.getElementById('prev-page');
+            const nextPageBtn = document.getElementById('next-page');
+            const lastPageBtn = document.getElementById('last-page');
             
-            paginationListItems.forEach(item => {
-                item.classList.remove('active', 'disabled');
-            });
-            const activePageLink = document.querySelector(`.pagination .page-item[data-page="${currentPage}"]`);
-            if (activePageLink) {
-                activePageLink.classList.add('active');
+            firstPageBtn.classList.toggle('disabled', currentPage === 1 || totalPages === 0);
+            prevPageBtn.classList.toggle('disabled', currentPage === 1 || totalPages === 0);
+            nextPageBtn.classList.toggle('disabled', currentPage === totalPages || totalPages === 0);
+            lastPageBtn.classList.toggle('disabled', currentPage === totalPages || totalPages === 0);
+            
+            if (noDataRowPHP) {
+                noDataRowPHP.style.display = 'none';
             }
-
-            if (currentPage === 1 || totalPages === 0) {
-                firstPageBtn.classList.add('disabled');
-                prevPageBtn.classList.add('disabled');
+            if (noDataRowJS) {
+                noDataRowJS.style.display = visibleRows.length === 0 ? '' : 'none';
             }
-            if (currentPage === totalPages || totalPages === 0) {
-                lastPageBtn.classList.add('disabled');
-                nextPageBtn.classList.add('disabled');
-            }
+            
+            paginationList.style.display = visibleRows.length > 0 ? 'flex' : 'none';
         }
 
         function filterAndRender() {
-            currentPage = 1;
             updateVisibleRows();
+            currentPage = 1;
             showPage(currentPage);
-            renderPageButtons(); 
-            updatePaginationButtons();
+            renderPagination();
         }
-
-        // --- Event Listeners ---
-        searchInput.addEventListener('keyup', filterAndRender);
-        tanggalMulaiInput.addEventListener('change', filterAndRender);
-        tanggalAkhirInput.addEventListener('change', filterAndRender);
 
         paginationList.addEventListener('click', function(e) {
             e.preventDefault();
             const clickedItem = e.target.closest('.page-item');
-            if (!clickedItem || clickedItem.classList.contains('disabled')) return;
+            if (!clickedItem || clickedItem.classList.contains('disabled') || clickedItem.classList.contains('active')) return;
             
             const totalPages = Math.ceil(visibleRows.length / rowsPerPage);
-            const page = parseInt(clickedItem.getAttribute('data-page'));
-            if (!isNaN(page)) {
-                currentPage = page;
-            } else if (clickedItem.id === 'first-page') {
+            if (clickedItem.id === 'first-page') {
                 currentPage = 1;
             } else if (clickedItem.id === 'last-page') {
                 currentPage = totalPages;
@@ -298,166 +288,53 @@
                 currentPage = Math.max(1, currentPage - 1);
             } else if (clickedItem.id === 'next-page') {
                 currentPage = Math.min(totalPages, currentPage + 1);
+            } else {
+                currentPage = parseInt(clickedItem.getAttribute('data-page'));
             }
 
             showPage(currentPage);
-            updatePaginationButtons();
+            renderPagination();
         });
-
-        // Event listener untuk tombol Edit
-        tableBody.addEventListener('click', function(e) {
-            if (e.target.classList.contains('edit-btn')) {
-                const row = e.target.closest('tr');
-                const rowId = row.getAttribute('data-row-id');
-                const namaKategori = row.querySelector('.nama_kategori_td p').textContent;
-                
-                document.getElementById('edit_row_id').value = rowId;
-                document.getElementById('edit_nama_kategori').value = namaKategori;
-
-                // Tambahkan class is-filled untuk form input-group-outline yang sudah terisi
-                document.getElementById('edit_nama_kategori').parentElement.classList.add('is-filled');
-            }
-        });
-
-        // Event listener untuk tombol Simpan Perubahan di modal Edit
-        document.getElementById('saveChangesBtn').addEventListener('click', function() {
-            const rowId = document.getElementById('edit_row_id').value;
-            const namaKategoriBaru = document.getElementById('edit_nama_kategori').value;
-
-            if (namaKategoriBaru.trim() === '') {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: 'Nama kategori tidak boleh kosong!',
-                });
-                return;
-            }
-
-            const rowToUpdate = document.querySelector(`tr[data-row-id="${rowId}"]`);
-            if (rowToUpdate) {
-                rowToUpdate.querySelector('.nama_kategori_td p').textContent = namaKategoriBaru;
-            }
-            
-            const modal = bootstrap.Modal.getInstance(document.getElementById('editKategoriModal'));
-            modal.hide();
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil',
-                text: 'Data kategori berhasil diperbarui!',
-                showConfirmButton: false,
-                timer: 1500
+        
+        document.querySelectorAll('.edit-btn').forEach(btn => {
+            btn.addEventListener('click', function () {
+                let id = this.getAttribute('data-id');
+                let nama = this.getAttribute('data-nama');
+                document.getElementById('edit_nama_kategori').value = nama;
+                document.getElementById('editKategoriForm').action = "{{ route('kategori.update', ':id') }}".replace(':id', id);
             });
         });
 
-        // Event listener untuk tombol Tambah Kategori di modal
-        document.getElementById('saveTambahKategoriBtn').addEventListener('click', function() {
-            const namaKategoriBaru = document.getElementById('tambah_nama_kategori').value;
+        // SweetAlert konfirmasi delete
+        document.querySelectorAll('.btn-delete').forEach(function(button) {
+            button.addEventListener('click', function(e) {
+                let form = this.closest('form');
+                let kategoriNama = this.dataset.kategoriNama;
 
-            if (namaKategoriBaru.trim() === '') {
                 Swal.fire({
-                    icon: 'error',
-                    title: 'Gagal',
-                    text: 'Nama kategori tidak boleh kosong!',
-                });
-                return;
-            }
-
-            const newIndex = rows.length;
-            const newRow = document.createElement('tr');
-            newRow.className = 'data-row';
-            newRow.setAttribute('data-page', Math.ceil((newIndex + 1) / rowsPerPage));
-            newRow.setAttribute('data-row-id', newIndex);
-
-            const today = new Date();
-            const tanggalSekarang = today.toISOString().slice(0, 10);
-            const formattedDate = new Intl.DateTimeFormat('id-ID', {
-                weekday: 'long',
-                day: 'numeric',
-                month: 'long',
-                year: 'numeric'
-            }).format(today);
-
-            newRow.innerHTML = `
-                <td><p class="text-xs font-weight-bold mb-0">${newIndex + 1}</p></td>
-                <td class="nama_kategori_td"><p class="text-xs font-weight-bold mb-0">${namaKategoriBaru}</p></td>
-                <td class="text-center tanggal-update" data-original-date="${tanggalSekarang}">
-                    <p class="text-xs font-weight-bold mb-0">${formattedDate}</p>
-                </td>
-                <td class="text-center">
-                    <a href="#" class="btn btn-sm btn-warning mb-0 edit-btn" data-bs-toggle="modal" data-bs-target="#editKategoriModal">Edit</a>
-                    <a href="#" class="btn btn-sm btn-danger mb-0 delete-btn">Delete</a>
-                </td>
-            `;
-
-            tableBody.appendChild(newRow);
-            rows = tableBody.querySelectorAll('tr.data-row');
-            filterAndRender();
-
-            const modal = bootstrap.Modal.getInstance(document.getElementById('tambahKategoriModal'));
-            modal.hide();
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Berhasil',
-                text: 'Kategori baru berhasil ditambahkan!',
-                showConfirmButton: false,
-                timer: 1500
-            });
-        });
-
-        // Event listener untuk tombol Delete
-        tableBody.addEventListener('click', function(e) {
-            if (e.target.classList.contains('delete-btn')) {
-                e.preventDefault();
-                const row = e.target.closest('tr');
-                Swal.fire({
-                    title: 'Anda yakin?',
-                    text: "Data ini akan dihapus permanen!",
+                    title: 'Yakin hapus?',
+                    text: `Kategori "${kategoriNama}" akan dihapus permanen.`,
                     icon: 'warning',
                     showCancelButton: true,
                     confirmButtonColor: '#d33',
                     cancelButtonColor: '#6c757d',
-                    confirmButtonText: 'Ya, Hapus!',
+                    confirmButtonText: 'Ya, hapus!',
                     cancelButtonText: 'Batal'
                 }).then((result) => {
                     if (result.isConfirmed) {
-                        row.remove();
-                        rows = tableBody.querySelectorAll('tr.data-row');
-                        rows.forEach((r, i) => {
-                            r.querySelector('td p').textContent = i + 1;
-                            r.setAttribute('data-row-id', i);
-                        });
-                        filterAndRender();
-                        Swal.fire(
-                            'Dihapus!',
-                            'Data berhasil dihapus.',
-                            'success'
-                        );
+                        form.submit();
                     }
                 });
-            }
+            });
         });
 
-        // Memperbaiki masalah backdrop modal yang tidak hilang setelah ditutup
-        const editModalElement = document.getElementById('editKategoriModal');
-        editModalElement.addEventListener('hidden.bs.modal', function (event) {
-            const backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) {
-                backdrop.remove();
-            }
-        });
-
-        const tambahModalElement = document.getElementById('tambahKategoriModal');
-        tambahModalElement.addEventListener('hidden.bs.modal', function (event) {
-            const backdrop = document.querySelector('.modal-backdrop');
-            if (backdrop) {
-                backdrop.remove();
-            }
-            document.getElementById('tambahKategoriForm').reset();
-        });
+        // Event listener untuk filter tanggal dan pencarian
+        searchInput.addEventListener('keyup', filterAndRender);
+        tanggalMulaiInput.addEventListener('change', filterAndRender);
+        tanggalAkhirInput.addEventListener('change', filterAndRender);
         
         filterAndRender();
     });
 </script>
+
 @endsection
