@@ -1,6 +1,11 @@
+# Use the official PHP 8.3 FPM image as a base
 FROM --platform=linux/amd64 php:8.3-fpm
 
-# Install dependencies
+# Set the working directory
+WORKDIR /var/www
+
+# Install system dependencies required by Laravel
+# Using --no-install-recommends makes the image smaller
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg-dev \
@@ -9,10 +14,28 @@ RUN apt-get update && apt-get install -y \
     git \
     unzip \
     curl \
-    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-    && docker-php-ext-install pdo_mysql gd
+    libzip-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Configure and install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install pdo_mysql gd zip
 
 # Install Composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
 
-WORKDIR /var/www
+# Copy the entire application source code into the image
+COPY . .
+
+# Install PHP dependencies
+RUN composer install --no-interaction --no-plugins --no-scripts --prefer-dist
+
+# Set the correct permissions for Laravel's storage and bootstrap directories
+RUN chown -R www-data:www-data /var/www/storage /var/www/bootstrap/cache \
+    && chmod -R 775 /var/www/storage /var/www/bootstrap/cache
+
+# Expose port 9000 for PHP-FPM
+EXPOSE 9000
+
+# Set the default command to run when the container starts
+CMD ["php-fpm"]
